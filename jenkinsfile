@@ -24,21 +24,16 @@ pipeline {
 
 stages {
 
-        stage('Infrastructure') {
-          agent {
-            docker {
-              image 'hashicorp/terraform:light'
-              args "--entrypoint '' -v /etc/passwd:/etc/passwd -v /var/lib/jenkins/.ssh:/var/lib/jenkins/.ssh"
-            }
-          }
-
-            steps {
-            infrastructure('development', '/')
-          }
-        }
 
             stage('NetworkInit'){
+                agent {
+                    docker {
+                        image 'hashicorp/terraform:light'
+                        args "--entrypoint '' -v /etc/passwd:/etc/passwd -v /var/lib/jenkins/.ssh:/var/lib/jenkins/.ssh"
+                    }
+                }
                     steps {
+
                         dir('module5/networking/'){
                             sh 'terraform --version'
                             sh 'terraform init' 
@@ -48,6 +43,12 @@ stages {
                     }
                 }
                 stage('NetworkPlan'){
+                agent {
+                    docker {
+                        image 'hashicorp/terraform:light'
+                        args "--entrypoint '' -v /etc/passwd:/etc/passwd -v /var/lib/jenkins/.ssh:/var/lib/jenkins/.ssh"
+                    }
+                }                    
                     steps {
                         dir('module5/networking/'){
                             script {
@@ -63,6 +64,12 @@ stages {
                     }
                 }
                 stage('NetworkApply'){
+                agent {
+                    docker {
+                        image 'hashicorp/terraform:light'
+                        args "--entrypoint '' -v /etc/passwd:/etc/passwd -v /var/lib/jenkins/.ssh:/var/lib/jenkins/.ssh"
+                    }
+                }                    
                     steps {
                         script{
                             def apply = false
