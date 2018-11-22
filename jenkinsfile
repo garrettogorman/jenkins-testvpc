@@ -18,7 +18,7 @@ pipeline {
     SERVICE_NAME = "${PROJECT.name}"
     AWS_REGION = 'eu-west-1'
     AWS_ACCESS_KEY = credentials('terraform_acces_key')
-    AWS_SECRET_KEY = credentials('terraform-secret-key')
+    AWS_SECRET_KEY = credentials('terraform_secret_key')
     TF_VAR_project_name = "${PROJECT.name}"
   }
 
