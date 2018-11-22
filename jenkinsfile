@@ -78,13 +78,13 @@ stages {
                                 apply = true
                             } catch (err) {
                                 apply = false
-                                dir('module5/networking'){
+                                dir('.'){
                                     sh "terraform destroy -force"
                                 }
                                 currentBuild.result = 'UNSTABLE'
                             }
                             if(apply){
-                                dir('module5/networking'){
+                                dir('.'){
                                     unstash "terraform-plan"
                                     sh 'terraform apply terraform.tfplan'
                                 }
