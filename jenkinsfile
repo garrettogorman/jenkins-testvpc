@@ -104,7 +104,7 @@ stages {
                         script{
                             def apply = false
                             try {
-                                input message: 'keep environment', ok: 'Apply Config'
+                                input message: 'keep environment', ok: 'Keep Environment'
                                 apply = true
                             } catch (err) {
                                 apply = false
