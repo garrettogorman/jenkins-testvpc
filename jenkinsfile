@@ -1,0 +1,91 @@
+def PROJECT = [
+  name: 'jenkins-test',
+  infrastructure: [
+    environments: [
+      development: [
+        aws_account: credentials('aws_account'),
+        domain: credentials('domain'),
+        zone_name: credentials('zone_name')
+      ]
+    ]
+  ]
+]
+
+environment {
+    TF_VAR_aws_account = "${PROJECT.infrastructure.environments.development.aws_account}"
+    TF_VAR_aws_region = "eu-west-1"
+    TF_VAR_zone_name = "${PROJECT.infrastructure.environments.development.zone_name}"
+    TF_VAR_domain = "${PROJECT.infrastructure.environments.development.domain}"
+}
+
+pipeline {
+  agent none
+
+  environment {
+    SERVICE_NAME = "${PROJECT.name}"
+    AWS_REGION = 'eu-west-1'
+    AWS_ACCESS_KEY = credentials('terraform_acces_key')
+    AWS_SECRET_KEY = credentials('terraform-secret-key')
+    TF_VAR_project_name = "${PROJECT.name}"
+  }
+
+stages {
+
+        stage('Infrastructure') {
+          agent {
+            docker {
+              image 'hashicorp/terraform:light'
+              args "--entrypoint '' -v /etc/passwd:/etc/passwd -v /var/lib/jenkins/.ssh:/var/lib/jenkins/.ssh"
+            }
+          }
+        }
+
+       stage('NetworkInit'){
+            steps {
+                dir('module5/networking/'){
+                    sh 'terraform --version'
+                    sh 'terraform init' 
+                    sh "echo \$PWD"
+                    sh "whoami"
+                }
+            }
+        }
+        stage('NetworkPlan'){
+            steps {
+                dir('module5/networking/'){
+                    script {
+                        try {
+                           sh "terraform workspace new ${params.WORKSPACE}"
+                        } catch (err) {
+                            sh "terraform workspace select ${params.WORKSPACE}"
+                        }
+                        sh "terraform plan -out terraform.tfplan;echo \$? > status"
+                        stash name: "terraform-plan", includes: "terraform.tfplan"
+                    }
+                }
+            }
+        }
+        stage('NetworkApply'){
+            steps {
+                script{
+                    def apply = false
+                    try {
+                        input message: 'confirm apply', ok: 'Apply Config'
+                        apply = true
+                    } catch (err) {
+                        apply = false
+                        dir('module5/networking'){
+                            sh "terraform destroy -force"
+                        }
+                        currentBuild.result = 'UNSTABLE'
+                    }
+                    if(apply){
+                        dir('module5/networking'){
+                            unstash "terraform-plan"
+                            sh 'terraform apply terraform.tfplan'
+                        }
+                    }
+                }
+            }
+        }
+}
