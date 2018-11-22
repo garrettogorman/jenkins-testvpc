@@ -11,13 +11,6 @@ def PROJECT = [
   ]
 ]
 
-environment {
-    TF_VAR_aws_account = "${PROJECT.infrastructure.environments.development.aws_account}"
-    TF_VAR_aws_region = "eu-west-1"
-    TF_VAR_zone_name = "${PROJECT.infrastructure.environments.development.zone_name}"
-    TF_VAR_domain = "${PROJECT.infrastructure.environments.development.domain}"
-}
-
 pipeline {
   agent none
 
