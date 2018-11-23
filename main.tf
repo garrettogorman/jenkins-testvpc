@@ -28,7 +28,7 @@ module "vpc" {
 
   tags = {
     Owner       = "user"
-    Environment = "development"
+    Environment = "Changed"
   }
 
   vpc_tags = {
