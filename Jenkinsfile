@@ -25,7 +25,7 @@ pipeline {
 stages {
 
 
-            stage('NetworkInit'){
+            stage('NetworkInit-plan'){
                 agent {
                     docker {
                         image 'hashicorp/terraform:light'
@@ -40,29 +40,20 @@ stages {
                             sh "echo \$PWD"
                             sh "whoami"
                         }
-                    }
-                }
-                stage('NetworkPlan'){
-                agent {
-                    docker {
-                        image 'hashicorp/terraform:light'
-                        args "--entrypoint '' -v /etc/passwd:/etc/passwd -v /var/lib/jenkins/.ssh:/var/lib/jenkins/.ssh"
-                    }
-                }                    
-                    steps {
-                        dir('.'){
-                            script {
-                                try {
-                                sh "terraform workspace new ${params.WORKSPACE}"
-                                } catch (err) {
-                                    sh "terraform workspace select ${params.WORKSPACE}"
-                                }
+
+                        script {
+                            try {
+                            sh "terraform workspace new ${params.WORKSPACE}"
+                            } catch (err) {
+                                sh "terraform workspace select ${params.WORKSPACE}"
+                            }
                                 sh "terraform plan -out terraform.tfplan;echo \$? > status"
                                 stash name: "terraform-plan", includes: "terraform.tfplan"
                             }
-                        }
+
                     }
                 }
+
                 stage('NetworkApply'){
                 agent {
                     docker {
