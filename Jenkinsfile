@@ -92,36 +92,5 @@ stages {
                         }
                     }
                 }
-
-                stage('NetworkDestroy'){
-                agent {
-                    docker {
-                        image 'hashicorp/terraform:light'
-                        args "--entrypoint '' -v /etc/passwd:/etc/passwd -v /var/lib/jenkins/.ssh:/var/lib/jenkins/.ssh"
-                    }
-                }                    
-                    steps {
-                        script{
-                            def apply = false
-                            try {
-                                input message: 'keep environment', ok: 'Keep Environment'
-                                apply = true
-                            } catch (err) {
-                                apply = false
-                                dir('.'){
-                                    sh "terraform destroy -force"
-                                }
-                                currentBuild.result = 'UNSTABLE'
-                            }
-                            if(apply){
-                                dir('.'){
-                                }
-                            }
-                        }
-                    }
-                }
-
-
-
     }        
 }
