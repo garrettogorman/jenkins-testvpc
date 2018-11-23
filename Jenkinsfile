@@ -77,7 +77,7 @@ pipeline {
                             } catch (err) {
                                 apply = false
                                 dir('.'){
-                                    sh "terraform workspace select development"
+                                    // sh "terraform workspace select development"
                                     sh "terraform destroy -force"
                                 }
                                 currentBuild.result = 'UNSTABLE'
