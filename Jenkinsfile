@@ -43,9 +43,9 @@ pipeline {
 
                         script {
                             try {
-                            sh "terraform workspace new ${params.WORKSPACE}"
+                            sh "terraform workspace new developement"
                             } catch (err) {
-                                sh "terraform workspace select ${params.WORKSPACE}"
+                                sh "terraform workspace select developement}"
                             }
                                 sh "terraform plan -out terraform.tfplan;echo \$? > status"
                                 stash name: "terraform-plan", includes: "terraform.tfplan"
@@ -77,6 +77,7 @@ pipeline {
                             } catch (err) {
                                 apply = false
                                 dir('.'){
+                                    sh "terraform workspace select developement}"
                                     sh "terraform destroy -force"
                                 }
                                 currentBuild.result = 'UNSTABLE'
