@@ -44,6 +44,8 @@ pipeline {
                     }
                     steps {
 
+                        // Init
+
                         dir('.'){
                             sh 'terraform --version'
                             sh 'terraform init' 
@@ -52,6 +54,9 @@ pipeline {
                         }
 
                         script {
+
+                            // Plan
+
                             try {
                             // sh "terraform workspace new development"
                             } catch (err) {
@@ -59,9 +64,9 @@ pipeline {
                             }
                                 sh "terraform plan -out terraform.tfplan;echo \$? > status"
                                 stash name: "terraform-plan", includes: "terraform.tfplan"
-                            }
 
-                        script{
+                            // Apply
+
                             def apply = false
                             try {
                                 input message: 'confirm apply', ok: 'Apply Config'
@@ -81,7 +86,6 @@ pipeline {
                                 }
                             }
                         }
-
                     }
                 }
 
