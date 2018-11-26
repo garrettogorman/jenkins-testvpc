@@ -24,16 +24,18 @@ pipeline {
 
         stages {
 
-            when {
-                changeRequest target: 'master'
-            }
-
-            
-            // when {
-            //     changeRequest target: 'master'
-            // }
 
             stage('NetworkInit-plan'){
+
+                    when {
+                        changeRequest target: 'master'
+                    }
+
+                    
+                    // when {
+                    //     changeRequest target: 'master'
+                    // }
+
                     agent {
                         docker {
                             image 'hashicorp/terraform:light'
