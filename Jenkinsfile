@@ -26,6 +26,16 @@ pipeline {
 
 
             stage('NetworkInit-plan'){
+
+                    when {
+                        changeRequest target: 'master'
+                    }
+
+                    
+                    // when {
+                    //     changeRequest target: 'master'
+                    // }
+
                     agent {
                         docker {
                             image 'hashicorp/terraform:light'
@@ -33,6 +43,8 @@ pipeline {
                         }
                     }
                     steps {
+
+                        // Init
 
                         dir('.'){
                             sh 'terraform --version'
@@ -42,6 +54,9 @@ pipeline {
                         }
 
                         script {
+
+                            // Plan
+
                             try {
                             // sh "terraform workspace new development"
                             } catch (err) {
@@ -49,27 +64,9 @@ pipeline {
                             }
                                 sh "terraform plan -out terraform.tfplan;echo \$? > status"
                                 stash name: "terraform-plan", includes: "terraform.tfplan"
-                            }
 
-                    }
-                }
+                            // Apply
 
-                stage('NetworkApply'){
-                    agent {
-                        docker {
-                            image 'hashicorp/terraform:light'
-                            args "--entrypoint '' -v /etc/passwd:/etc/passwd -v /var/lib/jenkins/.ssh:/var/lib/jenkins/.ssh"
-                        }
-                    }    
-                    steps {
-                        dir('.'){
-                            sh 'terraform --version'
-                            sh 'terraform init' 
-                            sh "echo \$PWD"
-                            sh "whoami"
-                        }
-
-                        script{
                             def apply = false
                             try {
                                 input message: 'confirm apply', ok: 'Apply Config'
@@ -91,5 +88,43 @@ pipeline {
                         }
                     }
                 }
+
+                // stage('NetworkApply'){
+                //     agent {
+                //         docker {
+                //             image 'hashicorp/terraform:light'
+                //             args "--entrypoint '' -v /etc/passwd:/etc/passwd -v /var/lib/jenkins/.ssh:/var/lib/jenkins/.ssh"
+                //         }
+                //     }    
+                //     steps {
+                //         dir('.'){
+                //             sh 'terraform --version'
+                //             sh 'terraform init' 
+                //             sh "echo \$PWD"
+                //             sh "whoami"
+                //         }
+
+                //         script{
+                //             def apply = false
+                //             try {
+                //                 input message: 'confirm apply', ok: 'Apply Config'
+                //                 apply = true
+                //             } catch (err) {
+                //                 apply = false
+                //                 dir('.'){
+                //                     sh "terraform workspace select development"
+                //                     sh "terraform destroy -force"
+                //                 }
+                //                 currentBuild.result = 'UNSTABLE'
+                //             }
+                //             if(apply){
+                //                 dir('.'){
+                //                     unstash "terraform-plan"
+                //                     sh 'terraform apply terraform.tfplan'
+                //                 }
+                //             }
+                //         }
+                //     }
+                // }
         }        
 }
